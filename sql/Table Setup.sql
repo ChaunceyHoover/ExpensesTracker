@@ -61,4 +61,4 @@ CREATE TABLE static_expenses (
     notes NVARCHAR(512),
 
 	PRIMARY KEY (se_id)
-)
+) ENGINE = InnoDB, COMMENT = "Stores regularly occurring payments (rent, utilities, etc.)";
