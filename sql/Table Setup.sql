@@ -3,7 +3,7 @@ USE expenses;
 
 -- We keep this so we can re-run this table setup script as needed while we're in development. Once we hit v1 or "production",
 -- we remove this and instead plan out migration scripts to update tables.
-DROP TABLES IF EXISTS dynamic_expenses, static_expenses, loans, payment_type, payees, payments, locations;
+DROP TABLES IF EXISTS dynamic_expenses, static_expenses, payments, loans, payment_type, payees, locations;
 
 CREATE TABLE payees (
 	-- We use a "TINYINT" here because we're not going to have a lot of people using this application - it's just for us.
@@ -85,12 +85,18 @@ CREATE TABLE payment_type (
 CREATE TABLE payments (
 
 	payment_id INT NOT NULL AUTO_INCREMENT,
-    payee_id INT NOT NULL,
+    payee_id TINYINT UNSIGNED NOT NULL,
     payment_name VARCHAR(64) NOT NULL,
     pt_id INT NOT NULL,
     amount DECIMAL(13, 2) NOT NULL,
     `date` DATE NOT NULL,
     notes NVARCHAR(512),
     
-	PRIMARY KEY (payment_id)
+	PRIMARY KEY (payment_id),
+    
+    CONSTRAINT `fk_payment_payee`
+		FOREIGN KEY (payee_id) REFERENCES payees (payee_id),
+        
+	CONSTRAINT `fk_payment_paymenttype`
+		FOREIGN KEY (pt_id) REFERENCES payment_type (pt_id)
 ) ENGINE = InnoDB, COMMENT = "Store payments made by a registered payee.";
