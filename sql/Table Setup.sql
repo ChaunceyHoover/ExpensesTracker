@@ -62,3 +62,13 @@ CREATE TABLE static_expenses (
 
 	PRIMARY KEY (se_id)
 ) ENGINE = InnoDB, COMMENT = "Stores regularly occurring payments (rent, utilities, etc.)";
+
+CREATE TABLE loans (
+
+	loans_id SMALLINT NOT NULL AUTO_INCREMENT,
+    loans_name VARCHAR(64) NOT NULL,
+    amount DECIMAL(13, 2) NOT NULL,
+    notes NVARCHAR(512),
+    
+    PRIMARY KEY (loans_id)
+) ENGINE = InnoDB, COMMENT = "Stores larger sums of borrowed money to be paid over time.";
