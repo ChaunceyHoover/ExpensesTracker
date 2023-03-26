@@ -3,7 +3,7 @@ USE expenses;
 
 -- We keep this so we can re-run this table setup script as needed while we're in development. Once we hit v1 or "production",
 -- we remove this and instead plan out migration scripts to update tables.
-DROP TABLES IF EXISTS dynamic_expenses, payees, locations;
+DROP TABLES IF EXISTS dynamic_expenses, static_expenses, payees, locations;
 
 CREATE TABLE payees (
 	-- We use a "TINYINT" here because we're not going to have a lot of people using this application - it's just for us.
@@ -53,3 +53,16 @@ CREATE TABLE dynamic_expenses (
     CONSTRAINT `fk_de_locations`
 		FOREIGN KEY (location_id) REFERENCES locations (location_id)
 ) ENGINE = InnoDB, COMMENT = "Stores non-regularly occurring payments (groceries, food, etc.)";
+
+CREATE TABLE static_expenses (
+
+	se_id INT UNSIGNED AUTO_INCREMENT,
+    se_name VARCHAR(64) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+	amount DECIMAL(13, 2) NOT NULL,
+    notes NVARCHAR(512),
+
+	CONSTRAINT `pk_static_expenses`
+		PRIMARY KEY (se_id)
+)
