@@ -16,8 +16,7 @@ CREATE TABLE payees (
     
     -- A "Constriant" is a limiting factor or defining characteristic of a table to place restrictions on a table.
     -- A "Primary Key" is a constriant because it requires a unique value for this column.
-    CONSTRAINT `pk_payees`
-		PRIMARY KEY (payee_id)
+    PRIMARY KEY (payee_id)
 ) ENGINE = InnoDB, COMMENT = 'Stores names of people using the application';
 
 CREATE TABLE locations (
@@ -28,8 +27,7 @@ CREATE TABLE locations (
     -- Some restaurants have funny symbols in the name, so we use NVARCHAR here.
     location_name NVARCHAR(64) NOT NULL,
     
-    CONSTRAINT `pk_locations`
-		PRIMARY KEY (location_id)
+    PRIMARY KEY (location_id)
 ) ENGINE = InnoDB,  COMMENT = "Categories where purchases were made";
 
 CREATE TABLE dynamic_expenses (
@@ -40,8 +38,7 @@ CREATE TABLE dynamic_expenses (
     amount DECIMAL(13, 2) NOT NULL,
     notes NVARCHAR(512),
     
-    CONSTRAINT `pk_dynamic_expenses`
-		PRIMARY KEY (de_id),
+    PRIMARY KEY (de_id),
 	
     -- Here, we're creating another constraint - you can only insert a value in this column IF IT EXISTS in the
     -- table `payees` and has a row with a matching value in the column of `payee_id`. If there isn't a matching
@@ -63,6 +60,5 @@ CREATE TABLE static_expenses (
 	amount DECIMAL(13, 2) NOT NULL,
     notes NVARCHAR(512),
 
-	CONSTRAINT `pk_static_expenses`
-		PRIMARY KEY (se_id)
+	PRIMARY KEY (se_id)
 )
