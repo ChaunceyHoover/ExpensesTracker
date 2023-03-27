@@ -19,6 +19,13 @@ CREATE TABLE payees (
     PRIMARY KEY (payee_id)
 ) ENGINE = InnoDB, COMMENT = 'Stores names of people using the application';
 
+-- For now, hard code us as the only two people in the application
+INSERT INTO payees
+	(payee_name)
+VALUES
+	('Chauncey'),
+    ('Josh');
+
 CREATE TABLE locations (
 	-- We use a SMALLINT here because I have no idea how many places we're gonna shop at. It's probably in the hundreds,
     -- so just to be safe, we'll use a SMALLINT.
@@ -29,6 +36,14 @@ CREATE TABLE locations (
     
     PRIMARY KEY (location_id)
 ) ENGINE = InnoDB,  COMMENT = "Categories where purchases were made";
+
+-- Insert some commonly used locations to start with
+INSERT INTO locations
+	(location_name)
+VALUES
+	('Walmart'), ('Kroger'), ('Sam''s Club'), ('Target'), 
+    ('Total Wine'), ('McDonalds'), ('Chick-Fil-A'), 
+    ('HelloFresh');
 
 CREATE TABLE dynamic_expenses (
 	de_id INT UNSIGNED AUTO_INCREMENT,
@@ -84,6 +99,14 @@ CREATE TABLE payment_type (
     
     PRIMARY KEY (pt_id)
 ) ENGINE = InnoDB, COMMENT = "Categorizes the payment (dynamic, static, loan).";
+
+-- These won't change without making other database changes, so it's safe to hard code them in
+INSERT INTO payment_type
+	(pt_name)
+VALUES
+	('Dynamic'),
+    ('Static'),
+    ('Loan');
 
 CREATE TABLE payments (
 
