@@ -3,7 +3,7 @@ USE expenses;
 
 -- We keep this so we can re-run this table setup script as needed while we're in development. Once we hit v1 or "production",
 -- we remove this and instead plan out migration scripts to update tables.
-DROP TABLES IF EXISTS dynamic_expenses, payments, static_expenses, loans, payment_type, payees, locations;
+DROP TABLES IF EXISTS dynamic_expenses, payments, static_expenses, loans, payment_types, payees, locations;
 
 CREATE TABLE payees (
 	-- We use a "TINYINT" here because we're not going to have a lot of people using this application - it's just for us.
@@ -92,7 +92,7 @@ CREATE TABLE loans (
 		FOREIGN KEY (payee_id) REFERENCES payees (payee_id)
 ) ENGINE = InnoDB, COMMENT = "Stores larger sums of borrowed money to be paid over time.";
 
-CREATE TABLE payment_type (
+CREATE TABLE payment_types (
 
 	pt_id TINYINT NOT NULL AUTO_INCREMENT,
     pt_name VARCHAR(64) NOT NULL,
@@ -101,7 +101,7 @@ CREATE TABLE payment_type (
 ) ENGINE = InnoDB, COMMENT = "Categorizes the payment (dynamic, static, loan).";
 
 -- These won't change without making other database changes, so it's safe to hard code them in
-INSERT INTO payment_type
+INSERT INTO payment_types
 	(pt_name)
 VALUES
 	('Dynamic'),
@@ -124,7 +124,7 @@ CREATE TABLE payments (
 		FOREIGN KEY (payee_id) REFERENCES payees (payee_id),
         
 	CONSTRAINT `fk_payment_paymenttype`
-		FOREIGN KEY (pt_id) REFERENCES payment_type (pt_id)
+		FOREIGN KEY (pt_id) REFERENCES payment_types (pt_id)
 ) ENGINE = InnoDB, COMMENT = "Store payments made by a registered payee.";
 
 -- VIEWS
@@ -154,5 +154,5 @@ AS
     FROM payments pmnt
     LEFT JOIN payees p
     ON pmnt.payee_id = p.payee_id
-    LEFT JOIN payment_type pt
+    LEFT JOIN payment_types pt
     ON pmnt.pt_id = pt.pt_id;
