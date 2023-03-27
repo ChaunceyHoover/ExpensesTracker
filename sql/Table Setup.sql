@@ -100,3 +100,15 @@ CREATE TABLE payments (
 	CONSTRAINT `fk_payment_paymenttype`
 		FOREIGN KEY (pt_id) REFERENCES payment_type (pt_id)
 ) ENGINE = InnoDB, COMMENT = "Store payments made by a registered payee.";
+
+DROP VIEW IF EXISTS dynamic_expenses_view;
+
+CREATE VIEW dynamic_expenses_view
+AS
+    SELECT 
+		de.de_id, p.payee_id, p.payee_name, 
+        l.location_id, l.location_name, 
+        de.`date`, de.amount, de.notes
+    FROM dynamic_expenses de
+    LEFT JOIN payees p    ON de.payee_id = p.payee_id
+    LEFT JOIN locations l ON de.location_id = l.location_id;
