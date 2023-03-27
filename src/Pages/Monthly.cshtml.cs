@@ -9,26 +9,27 @@ namespace ExpensesApp.Pages
 {
     public class MonthlyModel : PageModel
     {
-        private IConfiguration _config;
-        private ISqlDataAccess _db;
-        private MySqlConnection _connection;
+        private MySqlConnection _conn;
 
-        public IList<Payee> Payees { get; set; } = default;
+        public IList<DynamicExpense> DynamicExpenses { get; set; }
+        public IList<StaticExpense> StaticExpenses { get; set; }
 
-        public MonthlyModel(IConfiguration config, ISqlDataAccess db, [FromServices] MySqlConnection connection) {
-            _config = config;
-            _db = db;
-            _connection = connection;
-        }
+        public MonthlyModel([FromServices] MySqlConnection connection)
+            => _conn = connection;
 
         public async Task OnGetAsync()
         {
-            var sql = @"SELECT * FROM dynamic_expenses_view";
+            // Get dynamic expenses
+            var dynamicSql = @"SELECT * FROM dynamic_expenses_view";
+            var dynamicResults = await _conn.QueryAsync<DynamicExpense, Payee, Location, DynamicExpense>(dynamicSql, (de, payee, loc) => { de.Payee = payee; de.Location = loc; return de; }, splitOn: "payee_id,location_id");
 
-            var dynamics = await _connection.QueryAsync<DynamicExpense, Payee, Location, DynamicExpense>(sql, (de, payee, loc) => { de.Payee = payee; de.Location = loc; return de; }, splitOn: "payee_id,location_id");
-            foreach (var dynamic in dynamics) {
-                Console.WriteLine($"{dynamic.Id} [Name:{dynamic.Payee?.Name}] [Location:{dynamic.Location?.Name}] [Amount:${dynamic.Amount}]");
-            }
+            // Get static expenses
+            var staticSql = @"SELECT * FROM static_expenses";
+            var staticResults = await _conn.QueryAsync<StaticExpense>(staticSql);
+
+            // Map to results for razor page to access
+            DynamicExpenses = dynamicResults.ToList();
+            StaticExpenses = staticResults.ToList();
         }
     }
 }

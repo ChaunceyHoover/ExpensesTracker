@@ -18,6 +18,15 @@
             </tr>
         </thead>
         <tbody>
+            @foreach (var expense in Model.DynamicExpenses) {
+                <tr>
+                    <td>@expense.Payee.Name</td>
+                    <td>@expense.Location.Name</td>
+                    <td>@expense.Date.ToShortDateString()</td>
+                    <td>@expense.Amount.ToString("C")</td>
+                    <td>@((expense.Amount / 2).ToString("C"))</td>
+                </tr>
+            }
         </tbody>
     </table>
 
@@ -31,10 +40,15 @@
             </tr>
         </thead>
         <tbody>
+            @foreach (var expense in Model.StaticExpenses) {
+                <tr>
+                    <td>@expense.Name</td>
+                    <td>@expense.Amount.ToString("C")</td>
+                    <td>@((expense.Amount / 2).ToString("C"))</td>
+                </tr>
+            }
         </tbody>
     </table>
 
-    @*@foreach (var payee in Model.Payees) {
-        <p>@payee.Name</p>
-    }*@
+    
 </div>
