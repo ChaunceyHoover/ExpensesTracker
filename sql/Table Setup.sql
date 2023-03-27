@@ -106,7 +106,7 @@ CREATE TABLE payments (
 
 -- VIEWS
 
-DROP VIEW IF EXISTS dynamic_expenses_view;
+DROP VIEW IF EXISTS dynamic_expenses_view, loans_view, payments_view;
 
 CREATE VIEW dynamic_expenses_view
 AS
@@ -117,3 +117,19 @@ AS
     FROM dynamic_expenses de
     LEFT JOIN payees p ON de.payee_id = p.payee_id
     LEFT JOIN locations l ON de.location_id = l.location_id;
+    
+CREATE VIEW loans_view
+AS
+	SELECT lo.loans_name, p.payee_id, p.payee_name, lo.amount, lo.notes
+    FROM loans lo
+    LEFT JOIN payees p
+    ON lo.payee_id = p.payee_id;
+    
+CREATE VIEW payments_view
+AS
+    SELECT pmnt.payment_id, pmnt.payment_name, p.payee_id, p.payee_name, pmnt.`date`, pmnt.amount, pmnt.notes
+    FROM payments pmnt
+    LEFT JOIN payees p
+    ON pmnt.payee_id = p.payee_id
+    LEFT JOIN payment_type pt
+    ON pmnt.pt_id = pt.pt_id;
