@@ -80,13 +80,13 @@ CREATE TABLE static_expenses (
 
 CREATE TABLE loans (
 
-	loans_id SMALLINT NOT NULL AUTO_INCREMENT,
-    loans_name VARCHAR(64) NOT NULL,
+	loan_id SMALLINT NOT NULL AUTO_INCREMENT,
+    loan_name VARCHAR(64) NOT NULL,
     payee_id TINYINT UNSIGNED NOT NULL,
     amount DECIMAL(13, 2) NOT NULL,
     notes NVARCHAR(512),
     
-    PRIMARY KEY (loans_id),
+    PRIMARY KEY (loan_id),
     
     CONSTRAINT `fk_loans_payee`
 		FOREIGN KEY (payee_id) REFERENCES payees (payee_id)
@@ -143,7 +143,7 @@ AS
     
 CREATE VIEW loans_view
 AS
-	SELECT lo.loans_name, p.payee_id, p.payee_name, lo.amount, lo.notes
+	SELECT lo.loan_name, p.payee_id, p.payee_name, lo.amount, lo.notes
     FROM loans lo
     LEFT JOIN payees p
     ON lo.payee_id = p.payee_id;
