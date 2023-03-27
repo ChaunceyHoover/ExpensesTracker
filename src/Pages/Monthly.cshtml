@@ -1,0 +1,40 @@
+﻿@page
+@model MonthlyModel
+@{
+}
+
+<div class="text-center">
+    <h1 class="display-4 mb-5">Monthly Bills</h1>
+
+    <h2 class="display-6">Groceries</h2>
+    <table class="table mb-5">
+        <thead>
+            <tr>
+                <th>Payee</th>
+                <th>Location</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Split</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <h2 class="display-6">Rent</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Bill</th>
+                <th>Amount</th>
+                <th>Split</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    @*@foreach (var payee in Model.Payees) {
+        <p>@payee.Name</p>
+    }*@
+</div>
