@@ -1,7 +1,15 @@
+using ExpensesApp;
+using ExpensesApp.Data;
+using MySqlConnector;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+builder.Services.AddSingleton<ISqlDataAccess, SqlDataAccess>();
+builder.Services.AddTransient(x => 
+    new MySqlConnection(builder.Configuration.GetConnectionString("Default")));
 
 var app = builder.Build();
 

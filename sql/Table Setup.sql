@@ -134,9 +134,9 @@ DROP VIEW IF EXISTS dynamic_expenses_view, loans_view, payments_view;
 CREATE VIEW dynamic_expenses_view
 AS
     SELECT
-		de.de_id, p.payee_id, p.payee_name,
-        l.location_id, l.location_name,
-        de.`date`, de.amount, de.notes
+		de.de_id, de.`date`, de.amount, de.notes,
+        p.payee_id, p.payee_name,
+        l.location_id, l.location_name
     FROM dynamic_expenses de
     LEFT JOIN payees p ON de.payee_id = p.payee_id
     LEFT JOIN locations l ON de.location_id = l.location_id;
