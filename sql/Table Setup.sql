@@ -143,7 +143,7 @@ AS
     
 CREATE VIEW loans_view
 AS
-	SELECT lo.loan_name, p.payee_id, p.payee_name, lo.amount, lo.notes
+	SELECT lo.loan_name, lo.amount, lo.notes, p.payee_id, p.payee_name
     FROM loans lo
     LEFT JOIN payees p
     ON lo.payee_id = p.payee_id;
