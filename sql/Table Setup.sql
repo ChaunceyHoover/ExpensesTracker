@@ -3,7 +3,7 @@ USE expenses;
 
 -- We keep this so we can re-run this table setup script as needed while we're in development. Once we hit v1 or "production",
 -- we remove this and instead plan out migration scripts to update tables.
-DROP TABLES IF EXISTS dynamic_expenses, static_expenses, payments, loans, payment_type, payees, locations;
+DROP TABLES IF EXISTS dynamic_expenses, payments, static_expenses, loans, payment_type, payees, locations;
 
 CREATE TABLE payees (
 	-- We use a "TINYINT" here because we're not going to have a lot of people using this application - it's just for us.
@@ -67,16 +67,19 @@ CREATE TABLE loans (
 
 	loans_id SMALLINT NOT NULL AUTO_INCREMENT,
     loans_name VARCHAR(64) NOT NULL,
+    payee_id TINYINT UNSIGNED NOT NULL,
     amount DECIMAL(13, 2) NOT NULL,
     notes NVARCHAR(512),
     
-    PRIMARY KEY (loans_id)
+    PRIMARY KEY (loans_id),
+    
+    CONSTRAINT `fk_loans_payee`
+		FOREIGN KEY (payee_id) REFERENCES payees (payee_id)
 ) ENGINE = InnoDB, COMMENT = "Stores larger sums of borrowed money to be paid over time.";
 
 CREATE TABLE payment_type (
 
-	pt_id INT NOT NULL AUTO_INCREMENT,
-    pt_type INT NOT NULL,
+	pt_id TINYINT NOT NULL AUTO_INCREMENT,
     pt_name VARCHAR(64) NOT NULL,
     
     PRIMARY KEY (pt_id)
@@ -87,7 +90,7 @@ CREATE TABLE payments (
 	payment_id INT NOT NULL AUTO_INCREMENT,
     payee_id TINYINT UNSIGNED NOT NULL,
     payment_name VARCHAR(64) NOT NULL,
-    pt_id INT NOT NULL,
+    pt_id TINYINT NOT NULL,
     amount DECIMAL(13, 2) NOT NULL,
     `date` DATE NOT NULL,
     notes NVARCHAR(512),
@@ -100,15 +103,3 @@ CREATE TABLE payments (
 	CONSTRAINT `fk_payment_paymenttype`
 		FOREIGN KEY (pt_id) REFERENCES payment_type (pt_id)
 ) ENGINE = InnoDB, COMMENT = "Store payments made by a registered payee.";
-
-DROP VIEW IF EXISTS dynamic_expenses_view;
-
-CREATE VIEW dynamic_expenses_view
-AS
-    SELECT 
-		de.de_id, p.payee_id, p.payee_name, 
-        l.location_id, l.location_name, 
-        de.`date`, de.amount, de.notes
-    FROM dynamic_expenses de
-    LEFT JOIN payees p    ON de.payee_id = p.payee_id
-    LEFT JOIN locations l ON de.location_id = l.location_id;
