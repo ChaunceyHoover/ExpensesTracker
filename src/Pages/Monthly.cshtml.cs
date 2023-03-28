@@ -1,5 +1,4 @@
 using Dapper;
-using ExpensesApp.Data;
 using ExpensesApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -21,7 +20,11 @@ namespace ExpensesApp.Pages
         {
             // Get dynamic expenses
             var dynamicSql = @"SELECT * FROM dynamic_expenses_view";
-            var dynamicResults = await _conn.QueryAsync<DynamicExpense, Payee, Location, DynamicExpense>(dynamicSql, (de, payee, loc) => { de.Payee = payee; de.Location = loc; return de; }, splitOn: "payee_id,location_id");
+            var dynamicResults = await _conn.QueryAsync<DynamicExpense, Payee, Vendor, DynamicExpense>(dynamicSql, (de, payee, loc) => {
+                de.Payee = payee;
+                de.Location = loc;
+                return de;
+            }, splitOn: "payee_id,vendor_id");
 
             // Get static expenses
             var staticSql = @"SELECT * FROM static_expenses";
