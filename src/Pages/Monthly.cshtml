@@ -6,53 +6,57 @@
 <div class="text-center">
     <h1 class="display-4 mb-5">Monthly Bills</h1>
 
-    <h2 class="display-6">Lent Money</h2>
-    <table class="table mb-5">
-        <thead>
-            <tr>
-                <th>Payee</th>
-                <th>Vendor</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Split</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var expense in Model.DynamicExpenses) {
-                <tr>
-                    <td>@expense.Payee.Name</td>
-                    <td>@expense.Location.Name</td>
-                    <td>@expense.Date.ToShortDateString()</td>
-                    <td>@expense.Amount.ToString("C")</td>
-                    <td>@((expense.Amount / 2).ToString("C"))</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="d-flex">
+        <div class="flex-1">
+            <h2 class="display-6">Lent Money</h2>
+            <table class="table mb-5">
+                <thead>
+                    <tr>
+                        <th>Payee</th>
+                        <th>Vendor</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Split</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var expense in Model.DynamicExpenses) {
+                        <tr>
+                            <td>@expense.Payee.Name</td>
+                            <td>@expense.Location.Name</td>
+                            <td>@expense.Date.ToShortDateString()</td>
+                            <td>@expense.Amount.ToString("C")</td>
+                            <td>@((expense.Amount / 2).ToString("C"))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-    <h2 class="display-6">Reoccurring Expenses</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Bill</th>
-                <th>Billing Period</th>
-                <th>Amount</th>
-                <th>Split</th>
-                <th>Notes</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var expense in Model.StaticExpenses) {
-                <tr>
-                    <td>@expense.Name</td>
-                    <td>@expense.StartDate.ToShortDateString() - @expense.EndDate.ToShortDateString()</td>
-                    <td>@expense.Amount.ToString("C")</td>
-                    <td>@((expense.Amount / 2).ToString("C"))</td>
-                    <td>@expense.Notes</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    
+        <div>
+            <h2 class="display-6">Reoccurring Expenses</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Bill</th>
+                        <th>Billing Period</th>
+                        <th>Amount</th>
+                        <th>Split</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var expense in Model.StaticExpenses) {
+                        <tr>
+                            <td>@expense.Name</td>
+                            <td>@expense.StartDate.ToShortDateString() - @expense.EndDate.ToShortDateString()</td>
+                            <td>@expense.Amount.ToString("C")</td>
+                            <td>@((expense.Amount / 2).ToString("C"))</td>
+                            <td>@expense.Notes</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
