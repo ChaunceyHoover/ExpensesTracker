@@ -1,5 +1,5 @@
-using ExpensesApp;
-using ExpensesApp.Data;
+using Dapper.FluentMap;
+using ExpensesApp.Models.Mapper;
 using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,7 +7,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 
-builder.Services.AddSingleton<ISqlDataAccess, SqlDataAccess>();
 builder.Services.AddTransient(x => 
     new MySqlConnection(builder.Configuration.GetConnectionString("Default")));
 
@@ -29,5 +28,13 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+// Map MySQL columns to C# objects
+FluentMapper.Initialize(m => {
+    m.AddMap(new PayeeMap());
+    m.AddMap(new VendorMap());
+    m.AddMap(new DynamicExpenseMap());
+    m.AddMap(new StaticExpenseMapper());
+});
 
 app.Run();
