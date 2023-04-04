@@ -66,13 +66,13 @@ BEGIN
 		, 0);
 
 	SELECT
-		payee as 'payee_id',
-		@payee_name as 'payee_name',
 		ROUND(@dynamic_expenses, 2) as 'dynamic_expenses',
 		ROUND(@loans, 2) as 'loans',
 		ROUND(@static_expenses, 2) as 'static_expenses',
 		ROUND(@payments, 2) as 'payments',
-		ROUND((@dynamic_expenses + @loans + @static_expenses - @payments), 2) as 'balance';
+		ROUND((@dynamic_expenses + @loans + @static_expenses - @payments), 2) as 'balance',
+		payee as 'payee_id',
+		@payee_name as 'payee_name';
 END //
 
 DELIMITER ;
