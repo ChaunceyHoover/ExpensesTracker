@@ -1,4 +1,5 @@
 using Dapper.FluentMap;
+using ExpensesApp;
 using ExpensesApp.Models.Mapper;
 using MySqlConnector;
 
@@ -13,8 +14,7 @@ builder.Services.AddTransient(x =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
+if (!app.Environment.IsDevelopment()) {
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
@@ -35,6 +35,9 @@ FluentMapper.Initialize(m => {
     m.AddMap(new VendorMap());
     m.AddMap(new DynamicExpenseMap());
     m.AddMap(new StaticExpenseMapper());
+    m.AddMap(new ExpensesMap());
 });
+
+app.ConfigureApi();
 
 app.Run();
