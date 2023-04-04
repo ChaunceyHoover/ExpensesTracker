@@ -25,6 +25,7 @@ CREATE TABLE dynamic_expenses (
     vendor_id SMALLINT UNSIGNED NOT NULL,
     `date` DATETIME NOT NULL,
     amount DECIMAL(13, 2) NOT NULL,
+    split BOOLEAN DEFAULT TRUE,
     notes NVARCHAR(512),
     
     PRIMARY KEY (de_id),
@@ -39,6 +40,7 @@ CREATE TABLE dynamic_expenses (
 CREATE TABLE static_expenses (
 	se_id INT UNSIGNED AUTO_INCREMENT,
     se_name VARCHAR(64) NOT NULL,
+    issue_date DATE NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
 	amount DECIMAL(13, 2) NOT NULL,
@@ -102,5 +104,6 @@ INSERT INTO vendors
 VALUES
 	('Walmart'), ('Kroger'), ('Sam''s Club'), ('Target'), 
     ('Total Wine'), ('McDonalds'), ('Chick-Fil-A'), 
-    ('HelloFresh'),
-    ('American Airlines'), ('AirBnB'), ('Royal Carribbean');
+    ('HelloFresh'), ('American Airlines'), ('AirBnB'),
+    ('Royal Carribbean'), ('Old Time Pottery'), ('Pacific Spice'),
+    ('TicketMaster'), ('Wings&Tings'), ('Home Depot');
