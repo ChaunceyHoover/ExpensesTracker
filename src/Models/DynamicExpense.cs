@@ -30,6 +30,11 @@
         public float Amount { get; set; }
 
         /// <summary>
+        /// Determines if expense is shared or a loan
+        /// </summary>
+        public bool Split { get; set; }
+
+        /// <summary>
         /// (Optional) Any notes about this transaction
         /// </summary>
         public string Notes { get; set; }

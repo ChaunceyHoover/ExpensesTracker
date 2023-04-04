@@ -6,6 +6,7 @@ namespace ExpensesApp.Models.Mapper {
             Map(de => de.Id).ToColumn("de_id");
             Map(de => de.Date).ToColumn("date");
             Map(de => de.Amount).ToColumn("amount");
+            Map(de => de.Split).ToColumn("split");
             Map(de => de.Notes).ToColumn("notes");
         }
     }
