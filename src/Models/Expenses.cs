@@ -32,6 +32,10 @@
         /// A dynamic field that calculates the remaining amount due to pay
         /// </summary>
         /// <remarks>Calculated with the following formula: <code>Dynamic Expenses + Loans + Static Expenses - Payments</code></remarks>
-        public float Balance { get; set; }
+        public float Balance {
+            get {
+                return DynamicExpenses + Loans + StaticExpenses - Payments;
+            }
+        }
     }
 }

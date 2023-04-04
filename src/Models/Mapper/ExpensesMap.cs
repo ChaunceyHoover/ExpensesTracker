@@ -7,7 +7,6 @@ namespace ExpensesApp.Models.Mapper {
             Map(e => e.Loans).ToColumn("loans");
             Map(e => e.StaticExpenses).ToColumn("static_expenses");
             Map(e => e.Payments).ToColumn("payments");
-            Map(e => e.Balance).ToColumn("balance");
         }
     }
 }
