@@ -16,7 +16,7 @@
         /// <summary>
         /// The location this expense was made at
         /// </summary>
-        public Vendor Location { get; set; }
+        public Vendor Vendor { get; set; }
 
         /// <summary>
         /// The date this expense was made at
