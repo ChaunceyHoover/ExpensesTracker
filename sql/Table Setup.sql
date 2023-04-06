@@ -67,18 +67,28 @@ CREATE TABLE payments (
 
 /** VIEWS **/
 
-DROP VIEW IF EXISTS dynamic_expenses_view, payments_view;
+DROP VIEW IF EXISTS dynamic_expenses_view, loans_view, payments_view;
 
 CREATE VIEW dynamic_expenses_view
 AS
     SELECT
-		de.de_id, de.`date`, de.amount, de.notes,
+		de.de_id, de.`date`, de.amount, de.notes, de.amount / 2 as 'split',
         p.payee_id, p.payee_name,
         v.vendor_id, v.vendor_name
     FROM dynamic_expenses de
-    LEFT JOIN payees p ON de.payee_id = p.payee_id
+    LEFT JOIN payees p ON de.payee_id = p.payee_id AND de.split = true
     LEFT JOIN vendors v ON de.vendor_id = v.vendor_id;
-    
+
+CREATE VIEW loans_view
+AS
+	SELECT
+		de.de_id, de.`date`, de.amount, de.notes,
+		p.payee_id, p.payee_name,
+        v.vendor_id, v.vendor_name
+	FROM dynamic_expenses de
+    LEFT JOIN payees p ON de.payee_id = p.payee_id AND de.split = false
+    LEFT JOIN vendors v ON de.vendor_id = v.vendor_id;
+
 CREATE VIEW payments_view
 AS
     SELECT
