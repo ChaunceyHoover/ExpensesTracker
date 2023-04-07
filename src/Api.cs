@@ -101,17 +101,16 @@ namespace ExpensesApp {
                     // the selection and the `LIMIT`.
 
                     // First, we create a query for counting ALL results
-                    var totalCountSql = $"SELECT COUNT(de_id) FROM dynamic_expenses_view WHERE split = {splitExpenses}";
+                    var totalCountSql = $"SELECT COUNT(de_id) FROM {(splitExpenses ? "dynamic_expenses_view" : "loans_view")}";
 
                     // Next, we create a query for getting filtered results. I chose a local function
                     // so I can use the same query for both getting paginated results AND counting the
                     // total data results. That way I only have to maintain one query instead of two.
                     Func<string, string, string> generateSql = (selection, limit) =>
 $@"SELECT {selection}
-FROM dynamic_expenses_view
+FROM {( splitExpenses ? "dynamic_expenses_view" : "loans_view" )}
 WHERE
-    split = {splitExpenses}
-    AND `date` >= @start_range
+    `date` >= @start_range
     AND `date` <= @end_range
 ORDER BY {sortCol}
 {limit}";
@@ -123,6 +122,7 @@ ORDER BY {sortCol}
                     // Next, we get the actual paginated results based off what the user submitted via
                     // the jQuery datatables plugin
                     var resultSql = generateSql("*", $"LIMIT {resultStart}, {resultCount}");
+                    _logger.LogInformation(resultSql);
 
                     // Now that we have our queries, we just need to execute all of them.
 

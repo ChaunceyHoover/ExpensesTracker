@@ -55,12 +55,41 @@ const dynamicTable = new DataTable("#dynamic", {
     }
 });
 
+const loansTable = new DataTable("#loans", {
+    serverSide: true,
+    columns: [
+        { data: 'payee',  name: 'Lendor', render: (payee) => payee.name },
+        { data: 'vendor', name: 'Vendor', render: (vendor) => vendor.name },
+        { data: 'date',   name: 'Date',   render: (date) => (new Date(date)).toLocaleDateString() },
+        { data: 'amount', name: 'Amount', render: (amt) => formatter.format(amt) }
+    ],
+    ajax: {
+        url: '/api/loans',
+        data: (data) => {
+            return {
+                draw:        data.draw,
+                column:      data.columns[data.order[0].column].name,
+                order:       data.order[0].dir.toUpperCase(),
+                search:      data.search.value,
+                dateStart:   startDateInput.value,
+                dateEnd:     endDateInput.value,
+                resultStart: data.start,
+                resultCount: data.length
+            }
+        }
+    }
+});
+
 // Reload data on dat input change
 startDateInput.addEventListener("change", () => {
-    if (startDateInput.value != "")
+    if (startDateInput.value != "") {
         dynamicTable.ajax.reload();
+        loansTable.ajax.reload();
+    }
 });
 endDateInput.addEventListener("change", () => {
-    if (endDateInput.value != "")
+    if (endDateInput.value != "") {
         dynamicTable.ajax.reload();
+        loansTable.ajax.reload();
+    }
 })
