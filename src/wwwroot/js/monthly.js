@@ -39,7 +39,7 @@ const dynamicTable = new DataTable("#dynamic", {
         { data: 'split',  name: 'Split',  render: (_data, _type, row) => formatter.format(row.amount / 2), orderable: false }
     ],
     ajax: {
-        url: '/api/dynamic',
+        url: '/api/split',
         data: (data) => {
             return {
                 draw:        data.draw,

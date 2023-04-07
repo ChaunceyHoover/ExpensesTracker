@@ -20,7 +20,8 @@ namespace ExpensesApp {
 
             group.MapGet("/exp/{id:int}/{start:datetime}/{end:datetime}", GetBalance);
             group.MapGet("/exp/{id:int}", (int id) => GetBalance(id, DateTime.MinValue, DateTime.MaxValue));
-            group.MapGet("/dynamic", DynamicExpenseSearch);
+            group.MapGet("/split", SplitExpenses);
+            group.MapGet("/loans", Loans);
         }
 
         private static async Task<IResult> GetBalance(int id, DateTime start, DateTime end) {
@@ -46,9 +47,23 @@ namespace ExpensesApp {
             }
         }
 
-        private static async Task<IResult> DynamicExpenseSearch(
+        private static async Task<IResult> SplitExpenses(
             [FromQuery]int draw, [FromQuery]string search, [FromQuery]string column, [FromQuery]DtOrderDir order,
             [FromQuery]DateTime dateStart, [FromQuery]DateTime dateEnd, [FromQuery]int resultStart, [FromQuery]int resultCount) {
+
+            return await DynamicExpenseSearch(true, draw, search, column, order, dateStart, dateEnd, resultStart, resultCount);
+        }
+
+        private static async Task<IResult> Loans(
+            [FromQuery]int draw, [FromQuery]string search, [FromQuery]string column, [FromQuery]DtOrderDir order,
+            [FromQuery]DateTime dateStart, [FromQuery]DateTime dateEnd, [FromQuery]int resultStart, [FromQuery]int resultCount) {
+
+            return await DynamicExpenseSearch(false, draw, search, column, order, dateStart, dateEnd, resultStart, resultCount);
+        }
+
+        private static async Task<IResult> DynamicExpenseSearch(bool splitExpenses,
+            int draw, string search, string column, DtOrderDir order,
+            DateTime dateStart, DateTime dateEnd, int resultStart, int resultCount) {
             //_logger.LogInformation($"DEBUG: [draw:{draw}] [search:{search}] [col:{column}] [dir:{order}] [start:{dateStart.ToShortDateString()}] [end:{dateEnd.ToShortDateString()}] [start:{resultStart}] [length:{resultCount}]");
 
             try {
@@ -86,7 +101,7 @@ namespace ExpensesApp {
                     // the selection and the `LIMIT`.
 
                     // First, we create a query for counting ALL results
-                    var totalCountSql = "SELECT COUNT(de_id) FROM dynamic_expenses_view";
+                    var totalCountSql = $"SELECT COUNT(de_id) FROM dynamic_expenses_view WHERE split = {splitExpenses}";
 
                     // Next, we create a query for getting filtered results. I chose a local function
                     // so I can use the same query for both getting paginated results AND counting the
@@ -95,7 +110,8 @@ namespace ExpensesApp {
 $@"SELECT {selection}
 FROM dynamic_expenses_view
 WHERE
-    `date` >= @start_range
+    split = {splitExpenses}
+    AND `date` >= @start_range
     AND `date` <= @end_range
 ORDER BY {sortCol}
 {limit}";
