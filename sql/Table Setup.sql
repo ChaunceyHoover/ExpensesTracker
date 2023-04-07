@@ -76,8 +76,8 @@ AS
         p.payee_id, p.payee_name,
         v.vendor_id, v.vendor_name
     FROM dynamic_expenses de
-    LEFT JOIN payees p ON de.payee_id = p.payee_id AND de.split = true
-    LEFT JOIN vendors v ON de.vendor_id = v.vendor_id;
+    JOIN payees p ON de.payee_id = p.payee_id AND de.split = true
+    JOIN vendors v ON de.vendor_id = v.vendor_id;
 
 CREATE VIEW loans_view
 AS
@@ -86,8 +86,8 @@ AS
 		p.payee_id, p.payee_name,
         v.vendor_id, v.vendor_name
 	FROM dynamic_expenses de
-    LEFT JOIN payees p ON de.payee_id = p.payee_id AND de.split = false
-    LEFT JOIN vendors v ON de.vendor_id = v.vendor_id;
+    JOIN payees p ON de.payee_id = p.payee_id AND de.split = false
+    JOIN vendors v ON de.vendor_id = v.vendor_id;
 
 CREATE VIEW payments_view
 AS
