@@ -1,0 +1,92 @@
+﻿@page
+@model MonthlyModel
+@{
+    // .ToString("C") returns parentheses for negative money (ex: "($1.23)") instead of using a negative sign (ex: "-$1.23"),
+    // so we're going to manually format negative numbers to make it show how we want for negative numbers
+    Func<float, string> FormatCurrency = (currency) =>
+        currency >= 0 ?
+    currency.ToString("C") :                // Positive numbers are fine - return as is (ex: $1.23)
+    $"-{Math.Abs(currency).ToString("C")}"; // Prepend "-" in front of the absolute value for negatives to get the right format (ex: -$1.23)
+
+    var startOfMonth = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, 1);
+    var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+}
+
+@section Headers {
+<link rel="stylesheet" href="~/lib/jquery-datatables/dist/css/dataTables.bootstrap5.min.css" />
+}
+
+<div class="text-center">
+    <h1 class="display-4 mb-5">Monthly Bills</h1>
+
+    <div class="d-flex flex-1 mb-3">
+        <div class="input-group w-75 mx-auto">
+            <span class="input-group-text">Date Range</span>
+            <input id="start-date" type="date" aria-label="Start Date" value="@startOfMonth.ToString("yyyy-MM-dd")" class="form-control" />
+            <input id="end-date" type="date" aria-label="End Date" value="@endOfMonth.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+    </div>
+
+    <div class="flex-1 mb-3">
+        <h2 class="display-6">Split Expenses</h2>
+        <table id="dynamic" class="table mb-5">
+            <thead>
+                <tr>
+                    <th>Payee</th>
+                    <th>Vendor</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Split</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="flex-1 mb-3">
+        <h2 class="display-6">Loans</h2>
+        <table id="loans" class="table mb-5">
+            <thead>
+                <tr>
+                    <th>Lender</th>
+                    <th>Vendor</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div>
+        <h2 class="display-6">Reoccurring Expenses</h2>
+        <table id="static" class="table">
+            <thead>
+                <tr>
+                    <th>Bill</th>
+                    <th>Issued</th>
+                    <th>Amount</th>
+                    <th>Split</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var expense in Model.StaticExpenses) {
+                    <tr>
+                        <td>@expense.Name</td>
+                        <td data-sort="@expense.IssueDate.ToString("yyyy-MM-dd")">@expense.IssueDate.ToShortDateString()</td>
+                        <td>@FormatCurrency(expense.Amount)</td>
+                        <td>@FormatCurrency(expense.Amount / 2)</td>
+                        <td>@(expense.Notes == "" || expense.Notes == null ? $"{expense.Name} for {expense.StartDate} - {expense.EndDate}" : expense.Notes)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script src="~/lib/jquery-datatables/dist/js/jquery.dataTables.min.js"></script>
+<script src="~/lib/jquery-datatables/dist/js/dataTables.bootstrap5.min.js"></script>
+<script src="~/js/monthly.js" asp-append-version="true"></script>
+}

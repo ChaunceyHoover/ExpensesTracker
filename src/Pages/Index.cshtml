@@ -1,0 +1,31 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Debts</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Roomie💚💜</th>
+                <th>Debt 📉</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Chauncey</td>
+                <td id="user1">Loading...</td>
+            </tr>
+            <tr>
+                <td>Josh</td>
+                <td id="user2">Loading...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script src="~/js/index.js" asp-append-version="true"></script>
+}
