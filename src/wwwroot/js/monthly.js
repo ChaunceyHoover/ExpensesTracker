@@ -40,15 +40,17 @@ const dynamicTable = new DataTable("#dynamic", {
     ],
     ajax: {
         url: '/api/split',
-        data: (data) => new {
-            draw:        data.draw,
-            column:      data.columns[data.order[0].column].name,
-            order:       data.order[0].dir.toUpperCase(),
-            search:      data.search.value,
-            dateStart:   startDateInput.value,
-            dateEnd:     endDateInput.value,
-            resultStart: data.start,
-            resultCount: data.length
+        data: (data) => {
+            return {
+                draw: data.draw,
+                column: data.columns[data.order[0].column].name,
+                order: data.order[0].dir.toUpperCase(),
+                search: data.search.value,
+                dateStart: startDateInput.value,
+                dateEnd: endDateInput.value,
+                resultStart: data.start,
+                resultCount: data.length
+            }
         }
     }
 });
@@ -62,19 +64,21 @@ const loansTable = new DataTable("#loans", {
     ],
     ajax: {
         url: '/api/loans',
-        data: (data) => new {
-            draw:        data.draw,
-            column:      data.columns[data.order[0].column].name,
-            order:       data.order[0].dir.toUpperCase(),
-            search:      data.search.value,
-            dateStart:   startDateInput.value,
-            dateEnd:     endDateInput.value,
-            resultStart: data.start,
-            resultCount: data.length
+        data: (data) => {
+            return {
+                draw: data.draw,
+                column: data.columns[data.order[0].column].name,
+                order: data.order[0].dir.toUpperCase(),
+                search: data.search.value,
+                dateStart: startDateInput.value,
+                dateEnd: endDateInput.value,
+                resultStart: data.start,
+                resultCount: data.length
+            }
         }
     }
 });
-const staticTable = new DataTables("#static", {
+const staticTable = new DataTable("#static", {
     serverSide: true,
     columns: [
         { data: 'name', name: 'Bill' },
@@ -88,15 +92,17 @@ const staticTable = new DataTables("#static", {
     ],
     ajax: {
         url: '/api/static',
-        data: (data) => new {
-            draw: data.draw,
-            column: data.columns[data.order[0].column].name,
-            order: data.order[0].dir.toUpperCase(),
-            search: data.search.value,
-            dateStart: startDateInput.value,
-            dateEnd: endDateInput.value,
-            resultStart: data.start,
-            resultCount: data.length
+        data: (data) => {
+            return {
+                draw: data.draw,
+                column: data.columns[data.order[0].column].name,
+                order: data.order[0].dir.toUpperCase(),
+                search: data.search.value,
+                dateStart: startDateInput.value,
+                dateEnd: endDateInput.value,
+                resultStart: data.start,
+                resultCount: data.length
+            }
         }
     }
 });
@@ -115,4 +121,12 @@ endDateInput.addEventListener("change", () => {
         loansTable.ajax.reload();
         staticTable.ajax.reload();
     }
-})
+});
+
+// Add ability to total selected rows
+$('#static, #loans, #dynamic').on('click', 'tr', function () {
+    $(this).toggleClass('selected');
+
+    // selected table = $(this).parent().parent()[0].id
+    // TODO: Calculate all selected rows and show in a <span> above/below the table
+});

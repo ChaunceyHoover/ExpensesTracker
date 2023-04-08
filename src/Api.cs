@@ -23,6 +23,7 @@ namespace ExpensesApp {
             group.MapGet("/exp/{id:int}", (int id) => GetBalance(id, DateTime.MinValue, DateTime.MaxValue));
             group.MapGet("/split", SplitExpenses);
             group.MapGet("/loans", Loans);
+            group.MapGet("/static", StaticExpensesSearch);
         }
 
         private static async Task<IResult> GetBalance(int id, DateTime start, DateTime end) {
@@ -185,17 +186,17 @@ ORDER BY {sortCol}
                 string sortDir = order.ToString().ToUpper();
 
                 switch (column.ToLower()) {
-                    case "payee":
-                        sortCol = $"payee_name {sortDir}, `date` DESC, vendor_name ASC";
-                        break;
-                    case "vendor":
-                        sortCol = $"vendor_name {sortDir}, `date` DESC, amount DESC";
+                    case "bill":
+                        sortCol = $"se_name {sortDir}, `issue_date` DESC";
                         break;
                     case "amount":
-                        sortCol = $"amount {sortDir}, `date` DESC";
+                        sortCol = $"amount {sortDir}, `issue_date` DESC";
+                        break;
+                    case "notes":
+                        sortCol = $"notes {sortDir}, `issue_date` DESC";
                         break;
                     default:
-                        sortCol = $"`date` {sortDir}, vendor_name ASC, amount DESC";
+                        sortCol = $"`issue_date` {sortDir}, amount DESC";
                         break;
                 }
 
