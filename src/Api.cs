@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Reflection.Metadata.Ecma335;
 using Dapper;
 using ExpensesApp.Models;
 using ExpensesApp.Models.Auxiliary;
@@ -41,22 +42,22 @@ namespace ExpensesApp {
 
                     return Results.Ok(expensesResult.FirstOrDefault());
                 }
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 _logger.LogError($"{ex.Message}\n{ex.StackTrace}");
                 return Results.Problem("Unable to query database");
             }
         }
 
         private static async Task<IResult> SplitExpenses(
-            [FromQuery]int draw, [FromQuery]string search, [FromQuery]string column, [FromQuery]DtOrderDir order,
-            [FromQuery]DateTime dateStart, [FromQuery]DateTime dateEnd, [FromQuery]int resultStart, [FromQuery]int resultCount) {
+            [FromQuery] int draw, [FromQuery] string search, [FromQuery] string column, [FromQuery] DtOrderDir order,
+            [FromQuery] DateTime dateStart, [FromQuery] DateTime dateEnd, [FromQuery] int resultStart, [FromQuery] int resultCount) {
 
             return await DynamicExpenseSearch(true, draw, search, column, order, dateStart, dateEnd, resultStart, resultCount);
         }
 
         private static async Task<IResult> Loans(
-            [FromQuery]int draw, [FromQuery]string search, [FromQuery]string column, [FromQuery]DtOrderDir order,
-            [FromQuery]DateTime dateStart, [FromQuery]DateTime dateEnd, [FromQuery]int resultStart, [FromQuery]int resultCount) {
+            [FromQuery] int draw, [FromQuery] string search, [FromQuery] string column, [FromQuery] DtOrderDir order,
+            [FromQuery] DateTime dateStart, [FromQuery] DateTime dateEnd, [FromQuery] int resultStart, [FromQuery] int resultCount) {
 
             return await DynamicExpenseSearch(false, draw, search, column, order, dateStart, dateEnd, resultStart, resultCount);
         }
@@ -64,7 +65,6 @@ namespace ExpensesApp {
         private static async Task<IResult> DynamicExpenseSearch(bool splitExpenses,
             int draw, string search, string column, DtOrderDir order,
             DateTime dateStart, DateTime dateEnd, int resultStart, int resultCount) {
-            //_logger.LogInformation($"DEBUG: [draw:{draw}] [search:{search}] [col:{column}] [dir:{order}] [start:{dateStart.ToShortDateString()}] [end:{dateEnd.ToShortDateString()}] [start:{resultStart}] [length:{resultCount}]");
 
             try {
                 // We never want to allow user input directly in the query when building a dynamic
@@ -101,28 +101,33 @@ namespace ExpensesApp {
                     // the selection and the `LIMIT`.
 
                     // First, we create a query for counting ALL results
-                    var totalCountSql = $"SELECT COUNT(de_id) FROM {(splitExpenses ? "dynamic_expenses_view" : "loans_view")}";
+                    var totalCountSql = $"SELECT COUNT(0) FROM {(splitExpenses ? "dynamic_expenses_view" : "loans_view")}";
 
                     // Next, we create a query for getting filtered results. I chose a local function
                     // so I can use the same query for both getting paginated results AND counting the
                     // total data results. That way I only have to maintain one query instead of two.
                     Func<string, string, string> generateSql = (selection, limit) =>
 $@"SELECT {selection}
-FROM {( splitExpenses ? "dynamic_expenses_view" : "loans_view" )}
+FROM {(splitExpenses ? "dynamic_expenses_view" : "loans_view")}
 WHERE
     `date` >= @start_range
     AND `date` <= @end_range
+    AND (
+        payee_name LIKE CONCAT('%', @search, '%')
+        OR vendor_name LIKE CONCAT('%', @search, '%')
+        OR amount LIKE CONCAT('%', @search, '%')
+        OR notes LIKE CONCAT('%', @search, '%')
+    )
 ORDER BY {sortCol}
 {limit}";
 
                     // The first time we use this query, we only want the TOTAL filtered results. So we
                     // just count how many results we have and don't put a `LIMIT` at the end.
-                    var filteredCountSql = generateSql("COUNT(de_id)", "");
+                    var filteredCountSql = generateSql("COUNT(0)", "");
 
                     // Next, we get the actual paginated results based off what the user submitted via
                     // the jQuery datatables plugin
                     var resultSql = generateSql("*", $"LIMIT {resultStart}, {resultCount}");
-                    _logger.LogInformation(resultSql);
 
                     // Now that we have our queries, we just need to execute all of them.
 
@@ -133,7 +138,8 @@ ORDER BY {sortCol}
                     // we'll define that now and then pass it to each query.
                     var filteredParameters = new {
                         start_range = dateStart.ToString("yyyy-MM-dd"),
-                        end_range = dateEnd.ToString("yyyy-MM-dd")
+                        end_range = dateEnd.ToString("yyyy-MM-dd"),
+                        search
                     };
 
                     // Query the TOTAL FILTERED results first in hopes that MySQL will cache those results
@@ -165,6 +171,84 @@ ORDER BY {sortCol}
                 _logger.LogError($"{ex.Message}\n{ex.StackTrace}");
                 return Results.Ok(new DtResult<DynamicExpense>() {
                     Error = "Unable to query database"
+                });
+            }
+        }
+
+        private static async Task<IResult> StaticExpensesSearch(
+            [FromQuery] int draw, [FromQuery] string search, [FromQuery] string column, [FromQuery] DtOrderDir order,
+            [FromQuery] DateTime dateStart, [FromQuery] DateTime dateEnd, [FromQuery] int resultStart, [FromQuery] int resultCount) {
+            try {
+                // A lot of this process is explained in the DynamicExpenseSearch method,
+                // so repeat comments will be avoided since the process is almost the same
+                string sortCol;
+                string sortDir = order.ToString().ToUpper();
+
+                switch (column.ToLower()) {
+                    case "payee":
+                        sortCol = $"payee_name {sortDir}, `date` DESC, vendor_name ASC";
+                        break;
+                    case "vendor":
+                        sortCol = $"vendor_name {sortDir}, `date` DESC, amount DESC";
+                        break;
+                    case "amount":
+                        sortCol = $"amount {sortDir}, `date` DESC";
+                        break;
+                    default:
+                        sortCol = $"`date` {sortDir}, vendor_name ASC, amount DESC";
+                        break;
+                }
+
+                using (var conn = new MySqlConnection(_config.GetConnectionString("Default"))) {
+                    var totalCountSql = $"SELECT COUNT(0) FROM static_expenses";
+
+                    // Just like dynamic query, generate query for both counting and data
+                    Func<string, string, string> generateSql = (selection, limit) =>
+$@"SELECT {selection}
+FROM static_expenses
+WHERE
+    `issue_date` >= @start_range
+    AND `issue_date` <= @end_range
+    AND (
+        se_name LIKE CONCAT('%', @search, '%')
+        OR amount LIKE CONCAT('%', @search, '%')
+        OR notes LIKE CONCAT('%', @search, '%')
+    )
+ORDER BY {sortCol}
+{limit}";
+
+                    // Generate both filtered queries (filtered total and filtered results)
+                    var filteredCountSql = generateSql("COUNT(se_id)", "");
+                    var resultSql = generateSql("*", $"LIMIT {resultStart}, {resultCount}");
+
+                    // Parameters are shared between both queries
+                    var filteredParameters = new {
+                        start_range = dateStart.ToString("yyyy-MM-dd"),
+                        end_range = dateEnd.ToString("yyyy-MM-dd"),
+                        search
+                    };
+
+                    var totalResults = await conn.QueryAsync<int>(totalCountSql);
+                    var totalFilteredResults = await conn.QueryAsync<int>(filteredCountSql,
+                        param: filteredParameters);
+
+                    // Query the user specified FILTERED results and map the data to objects
+                    var staticResults = await conn.QueryAsync<StaticExpense>(
+                        resultSql,
+                        param: filteredParameters
+                    );
+
+                    return Results.Ok(new DtResult<StaticExpense> {
+                        Draw = draw,
+                        RecordsTotal = totalResults.FirstOrDefault(),
+                        RecordsFiltered = totalFilteredResults.FirstOrDefault(),
+                        Data = staticResults
+                    });
+                }
+            } catch (Exception ex) {
+                _logger.LogError($"{ex.Message}\n{ex.StackTrace}");
+                return Results.Ok(new DtResult<StaticExpense>() {
+                    Error = "Unable to query database for static expeneses"
                 });
             }
         }

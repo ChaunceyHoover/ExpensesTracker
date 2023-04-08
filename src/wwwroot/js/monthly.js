@@ -40,21 +40,18 @@ const dynamicTable = new DataTable("#dynamic", {
     ],
     ajax: {
         url: '/api/split',
-        data: (data) => {
-            return {
-                draw:        data.draw,
-                column:      data.columns[data.order[0].column].name,
-                order:       data.order[0].dir.toUpperCase(),
-                search:      data.search.value,
-                dateStart:   startDateInput.value,
-                dateEnd:     endDateInput.value,
-                resultStart: data.start,
-                resultCount: data.length
-            }
+        data: (data) => new {
+            draw:        data.draw,
+            column:      data.columns[data.order[0].column].name,
+            order:       data.order[0].dir.toUpperCase(),
+            search:      data.search.value,
+            dateStart:   startDateInput.value,
+            dateEnd:     endDateInput.value,
+            resultStart: data.start,
+            resultCount: data.length
         }
     }
 });
-
 const loansTable = new DataTable("#loans", {
     serverSide: true,
     columns: [
@@ -65,17 +62,41 @@ const loansTable = new DataTable("#loans", {
     ],
     ajax: {
         url: '/api/loans',
-        data: (data) => {
-            return {
-                draw:        data.draw,
-                column:      data.columns[data.order[0].column].name,
-                order:       data.order[0].dir.toUpperCase(),
-                search:      data.search.value,
-                dateStart:   startDateInput.value,
-                dateEnd:     endDateInput.value,
-                resultStart: data.start,
-                resultCount: data.length
-            }
+        data: (data) => new {
+            draw:        data.draw,
+            column:      data.columns[data.order[0].column].name,
+            order:       data.order[0].dir.toUpperCase(),
+            search:      data.search.value,
+            dateStart:   startDateInput.value,
+            dateEnd:     endDateInput.value,
+            resultStart: data.start,
+            resultCount: data.length
+        }
+    }
+});
+const staticTable = new DataTables("#static", {
+    serverSide: true,
+    columns: [
+        { data: 'name', name: 'Bill' },
+        { data: 'issueDate', name: 'Issued', render: (date) => (new Date(date)).toLocaleDateString() },
+        { data: 'amount', name: 'Amount', render: (amt) => formatter.format(amt) },
+        { data: 'amount', name: 'Split', render: (amt) => formatter.format(amt / 2) },
+        {
+            data: 'notes', name: 'Notes', render: (note, _, row) =>
+                note ?? `${row.name} for ${row.startDate.toLocaleDateString()} to ${row.endDate.toLocaleDateString()}`
+        }
+    ],
+    ajax: {
+        url: '/api/static',
+        data: (data) => new {
+            draw: data.draw,
+            column: data.columns[data.order[0].column].name,
+            order: data.order[0].dir.toUpperCase(),
+            search: data.search.value,
+            dateStart: startDateInput.value,
+            dateEnd: endDateInput.value,
+            resultStart: data.start,
+            resultCount: data.length
         }
     }
 });
@@ -85,11 +106,13 @@ startDateInput.addEventListener("change", () => {
     if (startDateInput.value != "") {
         dynamicTable.ajax.reload();
         loansTable.ajax.reload();
+        staticTable.ajax.reload();
     }
 });
 endDateInput.addEventListener("change", () => {
     if (endDateInput.value != "") {
         dynamicTable.ajax.reload();
         loansTable.ajax.reload();
+        staticTable.ajax.reload();
     }
 })
