@@ -1,5 +1,22 @@
+
 # ExpensesTracker
 A learning application to track shared expenses between roomies.
+
+## Installing
+This application requires ASP.NET 7 and a MySQL-compatible database. We used [MariaDB](https://mariadb.com/), but you are free to use whatever you prefer.
+
+### Database Setup
+The database setup is simple. Create a new database and a user and give that user full access to everything in that database. After that, run the table setup script located at `sql/Table Setup.sql`. After that, run all scripts in `sql/Stored Procs`. Once you've completed that, the database is setup.
+
+### Application Setup
+The application is just a standard ASP.NET application, so just a simple build and run command will suffice.
+```bash
+dotnet build
+dotnet run
+```
+
+### Notes
+As of right now, the web application doesn't have a way to add in expenses or payments, so it must all be done from the database. Stay tuned for this feature to be added to the web application.
 
 ## Purpose
 The purpose of this application is to help @joshuawcampb learn more about databases and web application.
