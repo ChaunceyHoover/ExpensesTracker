@@ -31,6 +31,7 @@ const endDateInput = document.getElementById("end-date");
 
 const dynamicTable = new DataTable("#dynamic", {
     serverSide: true,
+    bAutoWidth: false,
     columns: [
         { data: 'payee',  name: 'Payee',  render: (payee) =>  payee.name },
         { data: 'vendor', name: 'Vendor', render: (vendor) => vendor.name },
@@ -56,6 +57,7 @@ const dynamicTable = new DataTable("#dynamic", {
 });
 const loansTable = new DataTable("#loans", {
     serverSide: true,
+    bAutoWidth: false,
     columns: [
         { data: 'payee',  name: 'Lendor', render: (payee) => payee.name },
         { data: 'vendor', name: 'Vendor', render: (vendor) => vendor.name },
@@ -80,6 +82,7 @@ const loansTable = new DataTable("#loans", {
 });
 const staticTable = new DataTable("#static", {
     serverSide: true,
+    bAutoWidth: false,
     columns: [
         { data: 'name', name: 'Bill' },
         { data: 'issueDate', name: 'Issued', render: (date) => (new Date(date)).toLocaleDateString() },
@@ -129,4 +132,8 @@ $('#static, #loans, #dynamic').on('click', 'tr', function () {
 
     // selected table = $(this).parent().parent()[0].id
     // TODO: Calculate all selected rows and show in a <span> above/below the table
+});
+
+$('button.accordion-button').on('click', (btn) => {
+    console.log(btn);
 });
