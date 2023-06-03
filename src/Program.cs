@@ -2,6 +2,7 @@ using Dapper.FluentMap;
 using ExpensesApp;
 using ExpensesApp.Models.Mapper;
 using MySqlConnector;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,13 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Configure for nginx in production
+if (app.Environment.IsProduction()) {
+    app.UseForwardedHeaders(new ForwardedHeadersOptions {
+        ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    });
+}
 
 app.UseAuthorization();
 
