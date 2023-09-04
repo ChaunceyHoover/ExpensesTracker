@@ -110,6 +110,18 @@ const staticTable = new DataTable("#static", {
     }
 });
 
+const dynamicRemoveBtn = $('#btn-remove-purchase');
+const loansRemoveBtn = $('#btn-remove-loan');
+const staticRemoveBtn = $('#btn-remove-expense');
+
+const dynamicModalTitle = $('#dynamic-modal-title');
+const dynamicModalBtn = $('#btn-add-dynamic-expense');
+const dynamicPayeeInput = $('#dynamic-payee-select');
+const dynamicVendorInput = $('#dynamic-vendor-select');
+const dynamicDateInput = $('#dynamic-date');
+const dynamicAmountInput = $('#dynamic-amount');
+var dynamicMode = "None";
+
 // Reload data on dat input change
 startDateInput.addEventListener("change", () => {
     if (startDateInput.value != "") {
@@ -130,10 +142,128 @@ endDateInput.addEventListener("change", () => {
 $('#static, #loans, #dynamic').on('click', 'tr', function () {
     $(this).toggleClass('selected');
 
+    // update button inputs
+    const dynamicSelected = $('#dynamic tr.selected').length,
+        loansSelected = $('#loans tr.selected').length,
+        staticSelected = $('#static tr.selected').length;
+
+    dynamicRemoveBtn.attr('disabled', dynamicSelected == 0);
+    dynamicRemoveBtn.text(dynamicSelected > 1 ? 'Remove Purchases' : 'Remove Purchase');
+
+    loansRemoveBtn.attr('disabled', loansSelected == 0);
+    loansRemoveBtn.text(loansSelected > 1 ? `Remove ${loansSelected} Loans` : 'Remove Loan');
+
+    staticRemoveBtn.attr('disabled', staticSelected == 0);
+    staticRemoveBtn.text(staticSelected > 1 ? 'Remove Expenses' : 'Remove Expense');
+
     // selected table = $(this).parent().parent()[0].id
     // TODO: Calculate all selected rows and show in a <span> above/below the table
 });
 
-$('button.accordion-button').on('click', (btn) => {
-    console.log(btn);
+$('#btn-add-purchase').on('click', () => {
+    dynamicModalTitle.text('Add Split Expense');
+    dynamicMode = "Split";
+});
+$('#btn-add-loan').on('click', () => {
+    dynamicModalTitle.text('Add Loan');
+    dynamicMode = "Loan";
+});
+
+dynamicModalBtn.on('click', () => {
+    var route = "";
+    if (dynamicMode == "Split") {
+        route = "/api/split"
+    } else if (dynamicMode == "Loan") {
+        route = "/api/loan";
+    } else {
+        return;
+    }
+
+    // Add the "is-invalid" class on for 3 seconds, then remove it
+    const flashWarning = (input) => {
+        input.toggleClass('is-invalid', true);
+        setTimeout(() => input.toggleClass('is-invalid', false), 3000);
+    }
+
+    if (dynamicPayeeInput.val() == -1) {
+        flashWarning(dynamicPayeeInput);
+        return;
+    } else if (dynamicVendorInput.val() == -1) {
+        flashWarning(dynamicVendorInput);
+        return;
+    } else if (dynamicDateInput.val() == null || dynamicDateInput.val() == "") {
+        flashWarning(dynamicDateInput);
+        return;
+    } else if (dynamicAmountInput.val() == null || dynamicAmountInput.val() == "" || dynamicAmountInput.val() <= 0) {
+        flashWarning(dynamicAmountInput);
+        return;
+    }
+
+    dynamicModalBtn.attr('disabled', true);
+
+    $.ajax({
+        method: 'POST',
+        url: route,
+
+        contentType: "application/json",
+        data: JSON.stringify({
+            payeeId: dynamicPayeeInput.val(),
+            vendorId: dynamicVendorInput.val(),
+            date: dynamicDateInput.val(),
+            amount: dynamicAmountInput.val(),
+            notes: $('#dynamic-notes').val()
+        }),
+
+        success: function () {
+            alert('Successfully added purchase');
+            if (dynamicMode == "Split")
+                dynamicTable.ajax.reload();
+            else
+                loansTable.ajax.reload();
+        },
+        error: function (a, b, c) {
+            alert('Unable to add purchase');
+            console.log(a, b, c);
+        },
+        complete: function () {
+            dynamicModalBtn.attr('disabled', false);
+        }
+    })
+})
+
+// Populate dynamic modal
+// TODO: Get selectize.js (or similar) to make Vendors dynamic
+$.ajax({
+    method: 'GET',
+    url: '/api/payees',
+
+    success: (result) => {
+        const payeeSelect = $('#dynamic-payee-select');
+
+        $.each(result, (_, payee) => {
+            payeeSelect
+                .append($('<option>', { value: payee.id, text: payee.name }));
+        });
+        payeeSelect.attr('disabled', null);
+    },
+    error: () => {
+        alert('Unable to populate payees for expenses modal');
+    }
+});
+$.ajax({
+    method: 'GET',
+    url: '/api/vendors',
+
+    success: (result) => {
+        const vendorSelect = $('#dynamic-vendor-select');
+
+        $.each(result, (_, vendor) => {
+            vendorSelect
+                .append($('<option>', { value: vendor.id, text: vendor.name }));
+        });
+        vendorSelect.attr('disabled', null);
+    },
+    error: () => {
+        alert('Unable to populate vendors for expenses modal');
+    }
 });
