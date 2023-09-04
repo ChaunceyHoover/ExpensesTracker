@@ -117,4 +117,4 @@ VALUES
     ('HelloFresh'), ('American Airlines'), ('AirBnB'),
     ('Royal Carribbean'), ('Old Time Pottery'), ('Pacific Spice'),
     ('TicketMaster'), ('Wings&Tings'), ('Home Depot'), ('Publix'),
-    ('Sprouts');
+    ('Sprouts'), ('Canyons');
