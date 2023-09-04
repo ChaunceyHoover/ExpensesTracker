@@ -24,6 +24,16 @@ namespace ExpensesApp {
             group.MapGet("/split", SplitExpenses);
             group.MapGet("/loans", Loans);
             group.MapGet("/static", StaticExpensesSearch);
+            group.MapGet("/vendors", GetVendorList);
+            group.MapGet("/payees", GetPayees);
+
+            group.MapPost("/split", AddSplitPayment);
+            group.MapPost("/loan", AddLoan);
+            group.MapPost("/static", AddExpense);
+
+            group.MapDelete("/split/{expenseId}", DeleteSplitPayment);
+            group.MapDelete("/loan/{expenseId}", DeleteLoan);
+            group.MapDelete("/static/{expenseId}", DeleteExpense);
         }
 
         private static async Task<IResult> GetBalance(int id, DateTime start, DateTime end) {
@@ -251,6 +261,162 @@ ORDER BY {sortCol}
                 return Results.Ok(new DtResult<StaticExpense>() {
                     Error = "Unable to query database for static expeneses"
                 });
+            }
+        }
+
+        public static async Task<IResult> GetVendorList() {
+            try {
+                using (var conn = new MySqlConnection(_config.GetConnectionString("Default"))) {
+                    var result = await conn.QueryAsync<Vendor>("SELECT vendor_id, vendor_name FROM vendors ORDER BY vendor_name");
+                    return Results.Ok(result);
+                }
+            } catch (Exception ex) {
+                _logger.LogError($"{ex.Message}\n{ex.StackTrace}");
+                return Results.Problem("Unable to query database");
+            }
+        }
+
+        public static async Task<IResult> GetPayees() {
+            try {
+                using (var conn = new MySqlConnection(_config.GetConnectionString("Default"))) {
+                    var result = await conn.QueryAsync<Payee>("SELECT payee_id, payee_name FROM payees");
+                    return Results.Ok(result);
+                }
+            } catch (Exception ex) {
+                _logger.LogError($"{ex.Message}\n{ex.StackTrace}");
+                return Results.Problem($"Unable to query database - {ex.Message}");
+            }
+        }
+
+        // Create a simplified model for network requests since we don't need the entire object - just the IDs
+        public record DynamicPaymentCreationRequest(int PayeeId, int VendorId, DateTime Date, float Amount, string Notes);
+        public static async Task<IResult> AddSplitPayment([FromBody]DynamicPaymentCreationRequest model) {
+            try {
+                using (var conn = new MySqlConnection(_config.GetConnectionString("Default"))) {
+                    await conn.QueryAsync(
+@"INSERT INTO `dynamic_expenses`
+    (payee_id, vendor_id, date, amount, split, notes)
+VALUES
+    (@PayeeId, @VendorId, @Date, @Amount, TRUE, @Notes)",
+                        new {
+                            model.PayeeId,
+                            model.VendorId,
+                            model.Date,
+                            model.Amount,
+                            model.Notes
+                        }
+                    );
+
+                    return Results.Ok();
+                }
+            } catch (Exception ex) {
+                _logger.LogError($"{ex.Message}\n{ex.StackTrace}");
+                return Results.Problem($"Unable to query database - {ex.Message}");
+            }
+        }
+
+        public static async Task<IResult> AddLoan([FromBody]DynamicPaymentCreationRequest model) {
+            try {
+                using (var conn = new MySqlConnection(_config.GetConnectionString("Default"))) {
+                    await conn.QueryAsync(
+@"INSERT INTO `dynamic_expenses`
+    (payee_id, vendor_id, date, amount, split, notes)
+VALUES
+    (@PayeeId, @VendorId, @Date, @Amount, FALSE, @Notes)",
+                        new {
+                            model.PayeeId,
+                            model.VendorId,
+                            model.Date,
+                            model.Amount,
+                            model.Notes
+                        }
+                    );
+
+                    return Results.Ok();
+                }
+            } catch (Exception ex) {
+                _logger.LogError($"{ex.Message}\n{ex.StackTrace}");
+                return Results.Problem($"Unable to query database - {ex.Message}");
+            }
+        }
+
+        public static async Task<IResult> AddExpense([FromBody]StaticExpense model) {
+            try {
+                using (var conn = new MySqlConnection(_config.GetConnectionString("Default"))) {
+                    await conn.QueryAsync(
+@"INSERT INTO `static_expenses`
+    (se_name, issue_date, start_date, end_date, amount, notes)
+VALUES
+    (@Name, @IssueDate, @StartDate, @EndDate, @Amount, @Notes)",
+                        new {
+                            model.Name,
+                            model.IssueDate,
+                            model.StartDate,
+                            model.EndDate,
+                            model.Amount,
+                            model.Notes
+                        }
+                    );
+
+                    return Results.Ok();
+                }
+            } catch (Exception ex) {
+                _logger.LogError($"{ex.Message}\n{ex.StackTrace}");
+                return Results.Problem($"Unable to query database - {ex.Message}");
+            }
+        }
+
+        public static async Task<IResult> DeleteSplitPayment(int expenseId) {
+            try {
+                using (var conn = new MySqlConnection(_config.GetConnectionString("Default"))) {
+                    await conn.QueryAsync(
+                        "DELETE FROM `dynamic_expenses` WHERE de_id = @ExpenseId AND split = TRUE",
+                        new {
+                            ExpenseId = expenseId
+                        }
+                    );
+
+                    return Results.Ok();
+                }
+            } catch (Exception ex) {
+                _logger.LogError($"{ex.Message}\n{ex.StackTrace}");
+                return Results.Problem($"Unable to query database - {ex.Message}");
+            }
+        }
+
+        public static async Task<IResult> DeleteLoan(int expenseId) {
+            try {
+                using (var conn = new MySqlConnection(_config.GetConnectionString("Default"))) {
+                    await conn.QueryAsync(
+                        "DELETE FROM `dynamic_expenses` WHERE de_id = @ExpenseId AND split = FALSE",
+                        new {
+                            ExpenseId = expenseId
+                        }
+                    );
+
+                    return Results.Ok();
+                }
+            } catch (Exception ex) {
+                _logger.LogError($"{ex.Message}\n{ex.StackTrace}");
+                return Results.Problem($"Unable to query database - {ex.Message}");
+            }
+        }
+
+        public static async Task<IResult> DeleteExpense(int expenseId) {
+            try {
+                using (var conn = new MySqlConnection(_config.GetConnectionString("Default"))) {
+                    await conn.QueryAsync(
+                        "DELETE FROM `static_expenses` WHERE se_id = @ExpenseId",
+                        new {
+                            Id = expenseId
+                        }
+                    );
+
+                    return Results.Ok();
+                }
+            } catch (Exception ex) {
+                _logger.LogError($"{ex.Message}\n{ex.StackTrace}");
+                return Results.Problem($"Unable to query database - {ex.Message}");
             }
         }
     }
