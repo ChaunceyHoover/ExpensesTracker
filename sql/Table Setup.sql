@@ -98,8 +98,6 @@ AS
     LEFT JOIN payees p
     ON pmnt.payee_id = p.payee_id;
 
-
-
 /** DUMMY DATA **/
 -- Insert us into database
 INSERT INTO payees
@@ -117,4 +115,6 @@ VALUES
     ('HelloFresh'), ('American Airlines'), ('AirBnB'),
     ('Royal Carribbean'), ('Old Time Pottery'), ('Pacific Spice'),
     ('TicketMaster'), ('Wings&Tings'), ('Home Depot'), ('Publix'),
-    ('Sprouts'), ('Canyons');
+    ('Sprouts'), ('Canyons'), ('Knuckies Hoagies'), ('DragonCon');
+
+SELECT * FROM vendors;
